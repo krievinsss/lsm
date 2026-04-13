@@ -6,13 +6,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class ApiRequestLog extends Model {
-
+class ApiRequestLog extends Model
+{
     use HasFactory;
 
     protected $fillable = [
         'user_id',
         'api_key_id',
+        'requested_user_code',
         'method',
         'path',
         'status_code',
@@ -20,11 +21,13 @@ class ApiRequestLog extends Model {
         'ip_address',
     ];
 
-    public function user(): BelongsTo {
+    public function user(): BelongsTo
+    {
         return $this->belongsTo(User::class);
     }
-    
-    public function apiKey(): BelongsTo {
+
+    public function apiKey(): BelongsTo
+    {
         return $this->belongsTo(ApiKey::class);
     }
 }
