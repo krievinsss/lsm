@@ -14,7 +14,7 @@ class GuideController extends Controller
     }
 
     public function index(int $channel_nr, string $date): JsonResponse {
-        
+
         $guides = $this->guideService->getGuideForTvDay($channel_nr, $date);
 
         return response()->json([
@@ -32,6 +32,7 @@ class GuideController extends Controller
     }
 
     public function upcoming(int $channel_nr): JsonResponse {
+
         $guides = $this->guideService->getUpcoming($channel_nr);
 
         return response()->json([
@@ -40,6 +41,7 @@ class GuideController extends Controller
     }
 
     public function store(StoreGuideRequest $request): JsonResponse {
+        
         $guide = $this->guideService->create($request->validated());
         $guide = $this->guideService->adjustGuideEndTime($guide, $guide->channel_nr);
 

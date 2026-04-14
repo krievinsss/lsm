@@ -28,6 +28,9 @@
                                 Admin
                             </a>
                         @endif
+                        <a href="{{ route('docs') }}" class="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900">
+                            Documentation
+                        </a>
                     </div>
                 </div>
                 <div class="flex items-center gap-3">

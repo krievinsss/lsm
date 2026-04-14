@@ -1,58 +1,191 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+TV Guide API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A Laravel-based TV guide API with web authentication, API key management, request logging, and admin panel.
 
-## About Laravel
+This project demonstrates clean architecture, proper separation of concerns, and production-oriented backend design.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Features
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Web authentication (register / login / logout)
+API key management with secure hashed storage
+Custom API authentication using Bearer token + user code
+TV guide business logic:
+TV day starts at 06:00
+No overlapping programmes per channel
+Adjusted end times (adjusted_ends_at)
+API request logging (telemetry)
+Admin panel:
+manage users
+inspect API keys
+view request logs
+Rate limiting
+Validation and structured error responses
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Tech stack
 
-## Learning Laravel
+PHP 8.x
+Laravel 13
+MySQL
+Laravel Sail (Docker)
+Blade
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Setup
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Clone the repository:
+git clone https://github.com/krievinsss/lsm.git
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+cd lsm
 
-## Agentic Development
+Install dependencies:
+composer install
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+Copy environment file:
+cp .env.example .env
 
-```bash
-composer require laravel/boost --dev
+Start the application using Docker and Laravel Sail:
+./vendor/bin/sail up -d
 
-php artisan boost:install
-```
+Generate application key:
+./vendor/bin/sail artisan key:generate
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Run migrations and seed the database:
+./vendor/bin/sail artisan migrate:fresh --seed
 
-## Contributing
+Demo accounts
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+After seeding, you can log in with the following accounts:
 
-## Code of Conduct
+Admin:
+Email: admin@example.com
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Password: password
 
-## Security Vulnerabilities
+User:
+Email: user@example.com
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Password: password
 
-## License
+Seeder output will also display:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+generated user code
+generated API key
+
+API authentication
+
+API requests require both:
+
+Bearer token
+User code
+
+Example headers:
+Authorization: Bearer YOUR_API_KEY
+X-User-Code: 123456
+Accept: application/json
+Content-Type: application/json
+
+API endpoints
+
+Get TV guide for a day:
+GET /api/guide/{channel_nr}/{date}
+
+Example:
+GET /api/guide/1/2026-04-14
+
+Get current programme (on-air):
+GET /api/on-air/{channel_nr}
+
+Get upcoming programmes:
+GET /api/upcoming/{channel_nr}
+
+Returns next entries including the currently running one.
+
+Create new programme:
+POST /api/guide
+
+Request body example:
+{
+"title": "Vakara intervija",
+"channel_nr": 1,
+"starts_at": "2026-04-14 21:05:00",
+"ends_at": "2026-04-14 21:35:00"
+}
+
+Error responses
+
+401 Unauthorized – missing or invalid token / missing user code
+403 Forbidden – user code does not match API key owner
+422 Validation error – invalid data or overlap
+429 Too Many Requests – rate limit exceeded
+500 Server error
+
+Business rules
+
+TV day starts at 06:00
+Programmes must not overlap within the same channel
+Database stores original ends_at
+API returns adjusted_ends_at:
+next programme start time
+or original end time if last entry
+
+Request logging
+
+Each API request is logged with:
+
+user ID
+API key ID
+requested user code
+HTTP method
+path
+status code
+duration in milliseconds
+IP address
+
+Visible in:
+
+user dashboard
+admin panel
+
+Security
+
+API keys are stored as hashes
+Plain text key is shown only once
+Token revocation supported
+Middleware-based authentication
+Rate limiting per API key
+Validation via FormRequest classes
+
+
+Documentation
+
+More detailed documentation is available inside the application.
+
+After logging in, open:
+/docs
+
+There you will find:
+
+full API reference
+request/response examples
+authentication details
+business rules explanation
+curl examples
+
+Development notes
+
+Built using Laravel conventions without unnecessary abstractions
+Business logic is separated into services
+Controllers are kept thin
+Middleware is used for cross-cutting concerns
+API resources handle response formatting
+
+Future improvements
+
+Pagination for large datasets
+Filtering by time ranges
+API versioning
+Improved UI
+Export endpoints
+
+Author
+
+https://github.com/krievinsss
